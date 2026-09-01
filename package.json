@@ -1,0 +1,16 @@
+{
+  "name": "walkspot",
+  "private": true,
+  "description": "Walkspot — photo-proof challenge hunts for groups",
+  "scripts": {
+    "api": "npm --prefix apps/api run dev",
+    "web": "npm --prefix apps/web run dev",
+    "install:all": "npm --prefix apps/api install && npm --prefix apps/web install",
+    "typecheck": "npm --prefix apps/api run typecheck && npm --prefix apps/web run typecheck",
+    "test": "npm --prefix apps/api test && npm --prefix apps/web test",
+    "build": "npm --prefix apps/api run build && npm --prefix apps/web run build"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "install": "npm --prefix apps/api ci && npm --prefix apps/web ci",
+  "steps": [
+    {
+      "name": "typecheck",
+      "run": "npm --prefix apps/api run typecheck && npm --prefix apps/web run typecheck"
+    },
+    {
+      "name": "test",
+      "run": "npm --prefix apps/api test && npm --prefix apps/web test"
+    },
+    {
+      "name": "build",
+      "run": "npm --prefix apps/web run build"
+    }
+  ],
+  "watch": ["main"]
+}

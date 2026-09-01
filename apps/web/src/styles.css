@@ -1,0 +1,66 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+/*
+ * The palette. Names are what components refer to (`bg-brand text-ink`), so
+ * renaming a colour here renames it everywhere.
+ */
+@theme {
+  --color-brand: #1f5f5b;
+  --color-brand-deep: #133f3c;
+  --color-brand-soft: #dcebe6;
+  --color-accent: #e0872f;
+  --color-accent-soft: #fbe9d6;
+  --color-paper: #f6f1e7;
+  --color-paper-soft: #fcfaf5;
+  --color-ink: #172321;
+  --color-muted: #5f716d;
+  --color-hairline: #dad2c3;
+  --color-danger: #b3261e;
+  --color-danger-soft: #f8dcd9;
+  --color-ok: #2f7a4a;
+  --color-ok-soft: #dcefe1;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Hanken Grotesk", system-ui, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+}
+
+html {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+}
+
+/* Leaflet's divIcon markers */
+.ws-pin {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: var(--color-brand);
+  color: white;
+  font: 600 13px/1 var(--font-body);
+  border: 2px solid white;
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.25);
+}
+.ws-pin.done { background: var(--color-ok); }
+.ws-pin.off { background: var(--color-muted); }
+.ws-pin.me {
+  width: 18px;
+  height: 18px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 6px rgb(224 135 47 / 0.25);
+}
+.leaflet-container { font-family: var(--font-body); }
