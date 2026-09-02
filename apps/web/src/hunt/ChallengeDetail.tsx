@@ -1,3 +1,4 @@
+"use client";
 /**
  * ChallengeDetail — one challenge, and the proof form. Upload is three
  * steps (slot → PUT → file), each reported, because a walk is exactly where
@@ -5,12 +6,12 @@
  */
 import { Camera, Images, MapPin, Users } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router";
+import Link from "next/link";
 import { api, putFile, type Submission } from "../api";
 import { formatAgo, formatDistance, formatPoints } from "../format";
 import { locate } from "../geo";
 import { prepare } from "../image";
-import { Map } from "../map/Map";
+import { Map } from "../map";
 import { Button, Card, Field, Heading, Media, Notice, Pill, Screen, Spinner, Textarea, cx, messageOf } from "../ui";
 import { useAsync } from "../ui/useAsync";
 import { useHunt } from "./context";
@@ -19,9 +20,8 @@ import { StatusPill } from "./status";
 type Step = "idle" | "locating" | "preparing" | "uploading" | "filing";
 const STEP_LABEL: Record<Step, string> = { idle: "Send proof", locating: "Getting your location…", preparing: "Preparing photo…", uploading: "Uploading…", filing: "Filing proof…" };
 
-export function ChallengeDetail() {
+export function ChallengeDetail({ id }: { id: string }) {
   const { code, event, me } = useHunt();
-  const id = useParams().id!;
   const all = useAsync(() => api.challenges(code, "participant"), [code]);
   const people = useAsync(() => api.people(code), [code]);
   const mine = useAsync(() => api.feed(code, "participant", { challenge: id, mine: true }), [code, id]);
@@ -92,7 +92,7 @@ export function ChallengeDetail() {
     return (
       <Screen>
         <Notice tone="danger">{all.error ?? "This challenge is gone."}</Notice>
-        <Link to={`/e/${code}`} className="mt-4 inline-block underline">Back to challenges</Link>
+        <Link href={`/e/${code}`} className="mt-4 inline-block underline">Back to challenges</Link>
       </Screen>
     );
   }
@@ -101,7 +101,7 @@ export function ChallengeDetail() {
 
   return (
     <Screen>
-      <Link to={`/e/${code}`} className="text-sm text-muted">← All challenges</Link>
+      <Link href={`/e/${code}`} className="text-sm text-muted">← All challenges</Link>
       <div className="mt-3 flex items-start justify-between gap-3">
         <Heading className="text-2xl">{challenge.title}</Heading>
         <div className="shrink-0 text-right">

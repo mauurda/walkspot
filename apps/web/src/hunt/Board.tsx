@@ -1,14 +1,13 @@
+"use client";
 /** Board — the leaderboard, one read, both roles. */
-import { useParams } from "react-router";
-import { api, store, type Role } from "../api";
-import { getHunt } from "../session";
+import { api, type Role } from "../api";
+import { useHuntSession } from "../useSession";
 import { Empty, Heading, Notice, Screen, Spinner, cx } from "../ui";
 import { useAsync } from "../ui/useAsync";
 
-export function Board({ role }: { role: Role }) {
-  const code = (useParams().code ?? "").toUpperCase();
+export function Board({ code, role }: { code: string; role: Role }) {
   const { data, error, loading } = useAsync(() => api.board(code, role), [code, role]);
-  const meId = getHunt(store, code).participant?.id;
+  const meId = useHuntSession(code)?.participant?.id;
 
   return (
     <Screen>

@@ -1,15 +1,16 @@
+"use client";
 /**
  * HuntLayout — the participant shell. No claim on this device → Join. A
  * claim → validate it once against /me (a released spot clears itself
- * there), then tabs.
+ * there), then tabs around the page.
  */
 import { Camera, ListChecks, Map as MapIcon, Trophy } from "lucide-react";
-import { useEffect, useState } from "react";
-import { NavLink, Outlet, useParams } from "react-router";
-import { api, onSessionChange, store, type Event } from "../api";
+import { useEffect, useState, type ReactNode } from "react";
+import { api, type Event } from "../api";
 import { Join } from "../join/Join";
-import { getHunt } from "../session";
-import { Screen, Spinner, cx } from "../ui";
+import { Screen, Spinner } from "../ui";
+import { Tabs } from "../ui/Tabs";
+import { useHuntSession } from "../useSession";
 import { HuntContext } from "./context";
 
 const TABS = [
@@ -19,13 +20,10 @@ const TABS = [
   { to: "board", label: "Board", icon: Trophy },
 ];
 
-export function HuntLayout() {
-  const code = (useParams().code ?? "").toUpperCase();
-  const [, bump] = useState(0);
+export function HuntLayout({ code, children }: { code: string; children: ReactNode }) {
+  const session = useHuntSession(code);
+  const claim = session?.participant;
   const [event, setEvent] = useState<Event | null>(null);
-  const claim = getHunt(store, code).participant;
-
-  useEffect(() => onSessionChange(() => bump((n) => n + 1)), []);
 
   async function refreshEvent() {
     const res = await api.me(code, "participant");
@@ -38,7 +36,8 @@ export function HuntLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [code, claim?.token]);
 
-  if (!claim) return <Join code={code} onClaimed={() => bump((n) => n + 1)} />;
+  if (!session) return <Screen><Spinner /></Screen>;
+  if (!claim) return <Join code={code} />;
   if (!event) return <Screen><Spinner /></Screen>;
 
   return (
@@ -53,22 +52,8 @@ export function HuntLayout() {
           </div>
         </div>
       </header>
-      <Outlet />
-      <nav className="fixed inset-x-0 bottom-0 z-[500] border-t border-hairline bg-paper-soft pb-[env(safe-area-inset-bottom)]">
-        <div className="mx-auto grid max-w-2xl grid-cols-4">
-          {TABS.map((t) => (
-            <NavLink
-              key={t.to}
-              to={`/e/${code}${t.to ? `/${t.to}` : ""}`}
-              end={!t.to}
-              className={({ isActive }) => cx("flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-semibold", isActive ? "text-brand-deep" : "text-muted")}
-            >
-              <t.icon className="size-5" />
-              {t.label}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
+      {children}
+      <Tabs base={`/e/${code}`} tabs={TABS} />
     </HuntContext.Provider>
   );
 }

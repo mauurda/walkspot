@@ -1,10 +1,11 @@
+"use client";
 /**
  * ui — the form and layout primitives every screen composes. Label above,
  * hint below, inline error, 44px targets. Nothing here knows about hunts.
  */
 import { Loader2 } from "lucide-react";
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "react";
-import { Link } from "react-router";
+import Link from "next/link";
 
 export function cx(...parts: (string | false | null | undefined)[]): string {
   return parts.filter(Boolean).join(" ");
@@ -43,7 +44,7 @@ export function Button({
 
 export function LinkButton({ to, variant = "primary", className, children }: { to: string; variant?: Variant; className?: string; children: ReactNode }) {
   return (
-    <Link to={to} className={cx("inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 font-semibold transition", VARIANT[variant], className)}>
+    <Link href={to} className={cx("inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 font-semibold transition", VARIANT[variant], className)}>
       {children}
     </Link>
   );

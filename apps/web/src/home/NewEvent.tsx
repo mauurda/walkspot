@@ -1,12 +1,14 @@
+"use client";
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { api, store } from "../api";
 import { describeBonus } from "../format";
 import { setOrganizer } from "../session";
 import { Button, Field, Input, Notice, Screen, Textarea, Title, Toggle, messageOf } from "../ui";
 
 export function NewEvent() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [passphrase, setPassphrase] = useState("");
@@ -30,7 +32,7 @@ export function NewEvent() {
         group_bonus_cap: cap,
       });
       setOrganizer(store, event.code, event.name, { token });
-      navigate(`/o/${event.code}`, { replace: true });
+      router.replace(`/o/${event.code}`);
     } catch (err) {
       setError(messageOf(err));
     } finally {
@@ -40,7 +42,7 @@ export function NewEvent() {
 
   return (
     <Screen>
-      <Link to="/" className="text-sm text-muted">
+      <Link href="/" className="text-sm text-muted">
         ← Walkspot
       </Link>
       <Title className="mb-1 mt-4">New hunt</Title>

@@ -1,19 +1,20 @@
+"use client";
 import { ArrowRight, MapPin } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { Link, useNavigate } from "react-router";
-import { store } from "../api";
-import { listHunts } from "../session";
 import { Button, Card, Field, Input, LinkButton, Pill, Screen, Title } from "../ui";
+import { useHunts } from "../useSession";
 
 export function Home() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [code, setCode] = useState("");
-  const hunts = listHunts(store);
+  const hunts = useHunts() ?? [];
 
   function join(e: FormEvent) {
     e.preventDefault();
     const clean = code.trim().toUpperCase().replace(/[\s-]/g, "");
-    if (clean) navigate(`/e/${clean}`);
+    if (clean) router.push(`/e/${clean}`);
   }
 
   return (
@@ -39,7 +40,7 @@ export function Home() {
 
       <p className="mb-10 text-center text-sm text-muted">
         Organizing one?{" "}
-        <Link to="/new" className="font-semibold text-brand-deep underline">
+        <Link href="/new" className="font-semibold text-brand-deep underline">
           Create a hunt
         </Link>
       </p>

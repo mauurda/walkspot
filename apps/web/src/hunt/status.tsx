@@ -1,3 +1,4 @@
+"use client";
 /** One vocabulary for a proof's state, used by cards on both sides. */
 import { Check, Clock, X } from "lucide-react";
 import { Pill } from "../ui";

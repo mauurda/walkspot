@@ -1,6 +1,7 @@
+"use client";
 /** Settings — the event's fields, and the two links to share. */
 import { Copy } from "lucide-react";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../api";
 import { describeBonus } from "../format";
 import { Button, Card, Field, Heading, Input, Notice, Screen, Textarea, Toggle, messageOf } from "../ui";
@@ -18,8 +19,11 @@ export function Settings() {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
 
-  const joinUrl = `${window.location.origin}/e/${code}`;
-  const orgUrl = `${window.location.origin}/o/${code}`;
+  // Read after mount: there is no window on the server.
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
+  const joinUrl = `${origin}/e/${code}`;
+  const orgUrl = `${origin}/o/${code}`;
 
   async function copy(text: string) {
     try {

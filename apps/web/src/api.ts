@@ -1,5 +1,5 @@
 /**
- * api.ts — the HTTP client. Every call is scoped to a hunt code and a role,
+ * api.ts — the HTTP client (browser side). Every call is scoped to a hunt code and a role,
  * because that is how the API is shaped: a token is only ever good for one
  * hunt, and this device may hold a claim on one hunt and organize another.
  *
@@ -9,7 +9,8 @@
  */
 import { browserStore, clearOrganizer, clearParticipant, getHunt } from "./session";
 
-const BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) || "http://localhost:4000";
+// Same origin: the route handlers under app/api serve this very page.
+const BASE_URL = "/api";
 
 export const store = browserStore();
 

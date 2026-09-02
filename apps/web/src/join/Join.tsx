@@ -1,3 +1,4 @@
+"use client";
 /**
  * Join — pick who you are. This is the irreversible step: once a name is
  * claimed on this device, only an organizer can release it, and the screen
@@ -5,13 +6,13 @@
  */
 import { Lock } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router";
-import { api, store, type Event, type Spot } from "../api";
+import Link from "next/link";
+import { api, notifySessionChange, store, type Spot } from "../api";
 import { setParticipant } from "../session";
 import { Button, Notice, Screen, Title, cx, messageOf } from "../ui";
 import { useAsync } from "../ui/useAsync";
 
-export function Join({ code, onClaimed }: { code: string; onClaimed: () => void }) {
+export function Join({ code }: { code: string }) {
   const { data, error, loading, reload } = useAsync(() => api.event(code), [code]);
   const [picked, setPicked] = useState<Spot | null>(null);
   const [busy, setBusy] = useState(false);
@@ -23,7 +24,7 @@ export function Join({ code, onClaimed }: { code: string; onClaimed: () => void 
     try {
       const { token, participant } = await api.claim(code, spot.id);
       setParticipant(store, code, data!.event.name, { token, id: participant.id, name: participant.name });
-      onClaimed();
+      notifySessionChange();
     } catch (err) {
       setClaimError(messageOf(err));
       setPicked(null);
@@ -39,7 +40,7 @@ export function Join({ code, onClaimed }: { code: string; onClaimed: () => void 
       <Screen>
         <Title>Hmm.</Title>
         <p className="mt-2 text-muted">{error ?? "No hunt here."}</p>
-        <Link to="/" className="mt-6 inline-block font-semibold text-brand-deep underline">
+        <Link href="/" className="mt-6 inline-block font-semibold text-brand-deep underline">
           Try another code
         </Link>
       </Screen>
@@ -105,7 +106,7 @@ export function Join({ code, onClaimed }: { code: string; onClaimed: () => void 
 
       <p className="mt-10 text-center text-sm text-muted">
         Organizing this hunt?{" "}
-        <Link to={`/o/${code}`} className="font-semibold text-brand-deep underline">
+        <Link href={`/o/${code}`} className="font-semibold text-brand-deep underline">
           Sign in as organizer
         </Link>
       </p>

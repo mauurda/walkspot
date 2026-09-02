@@ -1,5 +1,6 @@
+"use client";
 import { LocateFixed, MapPin } from "lucide-react";
-import { Link } from "react-router";
+import Link from "next/link";
 import { api } from "../api";
 import { formatDistance, formatPoints } from "../format";
 import { distanceM, useLocation } from "../geo";
@@ -40,7 +41,7 @@ export function Challenges() {
 
       <div className="space-y-2">
         {challenges.map((c) => (
-          <Link key={c.id} to={`/e/${code}/c/${c.id}`} className="block">
+          <Link key={c.id} href={`/e/${code}/c/${c.id}`} className="block">
             <Card className="flex items-start justify-between gap-3 hover:border-brand">
               <div className="min-w-0">
                 <div className="font-semibold">{c.title}</div>

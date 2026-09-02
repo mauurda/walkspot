@@ -1,13 +1,12 @@
+"use client";
 /** Feed — everyone's proofs, newest first. Both roles read the same list. */
-import { useParams } from "react-router";
 import { api, type Role } from "../api";
 import { formatAgo, formatDistance, formatPoints } from "../format";
 import { Card, Empty, Heading, Media, Notice, Pill, Screen, Spinner } from "../ui";
 import { useAsync } from "../ui/useAsync";
 import { StatusPill } from "./status";
 
-export function Feed({ role }: { role: Role }) {
-  const code = (useParams().code ?? "").toUpperCase();
+export function Feed({ code, role }: { code: string; role: Role }) {
   const { data, error, loading } = useAsync(() => api.feed(code, role), [code, role]);
 
   return (

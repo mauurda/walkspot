@@ -1,3 +1,4 @@
+"use client";
 /**
  * Map — one Leaflet wrapper for every map in the app: numbered pins for
  * challenges, a dot for "you", a line for the route, and an optional

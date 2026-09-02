@@ -1,3 +1,4 @@
+"use client";
 /**
  * MapRoute — every located challenge on a map, and a plan: from where you
  * stand, in what order, along which streets. The order comes from the API;
@@ -5,11 +6,11 @@
  */
 import { Footprints, LocateFixed, RotateCcw } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router";
+import Link from "next/link";
 import { api, type Route } from "../api";
 import { formatDistance, formatDuration } from "../format";
 import { useLocation } from "../geo";
-import { Map, type Pin } from "../map/Map";
+import { Map, type Pin } from "../map";
 import { Button, Card, Empty, Notice, Pill, Screen, Spinner, cx, messageOf } from "../ui";
 import { useAsync } from "../ui/useAsync";
 import { useHunt } from "./context";
@@ -107,7 +108,7 @@ export function MapRoute() {
               <li key={s.id} className="flex items-center gap-3">
                 <span className="ws-pin">{i + 1}</span>
                 <div className="min-w-0 flex-1">
-                  <Link to={`/e/${code}/c/${s.id}`} className="block truncate font-semibold">{s.title}</Link>
+                  <Link href={`/e/${code}/c/${s.id}`} className="block truncate font-semibold">{s.title}</Link>
                   <div className="text-xs text-muted">
                     {route.legs[i + (route.from ? 0 : -1)] ? `${formatDistance(route.legs[i + (route.from ? 0 : -1)]!.distance_m)} · ${formatDuration(route.legs[i + (route.from ? 0 : -1)]!.duration_s)} ${i === 0 && route.from ? "from you" : "from the previous stop"}` : "start here"}
                   </div>

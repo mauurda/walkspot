@@ -1,3 +1,4 @@
+"use client";
 /**
  * People — the roster and its claims. "Release" is the one undo the app has:
  * it logs that device out and reopens the name.

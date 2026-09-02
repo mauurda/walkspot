@@ -1,3 +1,4 @@
+"use client";
 /**
  * Review — proofs, pending first. The distance badge is the GPS fix against
  * the challenge radius; it advises, the organizer decides.

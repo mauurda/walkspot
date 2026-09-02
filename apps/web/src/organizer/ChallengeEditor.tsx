@@ -1,3 +1,4 @@
+"use client";
 /**
  * ChallengeEditor — the list, and a form that is the same for new and edit.
  * A location is picked on the map (tap) or taken from the phone, with the
@@ -7,7 +8,7 @@ import { ArrowDown, ArrowUp, LocateFixed, MapPin, Pencil, Plus, Trash2 } from "l
 import { useState, type FormEvent } from "react";
 import { api, type Challenge, type ChallengeInput } from "../api";
 import { locate } from "../geo";
-import { Map, type Pin } from "../map/Map";
+import { Map, type Pin } from "../map";
 import { Button, Card, Empty, Field, Heading, Input, Notice, Pill, Screen, Spinner, Textarea, Toggle, messageOf } from "../ui";
 import { useAsync } from "../ui/useAsync";
 import { useOrg } from "./context";
