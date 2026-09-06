@@ -4,7 +4,7 @@
  * A location is picked on the map (tap) or taken from the phone, with the
  * radius drawn as the number a reviewer will later compare against.
  */
-import { ArrowDown, ArrowUp, LocateFixed, MapPin, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, LocateFixed, MapPin, Pencil, Plus, Repeat2, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { api, type Challenge, type ChallengeInput } from "../api";
 import { locate } from "../geo";
@@ -13,7 +13,7 @@ import { Button, Card, Empty, Field, Heading, Input, Notice, Pill, Screen, Spinn
 import { useAsync } from "../ui/useAsync";
 import { useOrg } from "./context";
 
-const BLANK: ChallengeInput = { title: "", description: null, points: 10, lat: null, lng: null, radius_m: 100 };
+const BLANK: ChallengeInput = { title: "", description: null, points: 10, lat: null, lng: null, radius_m: 100, repeat_label: null, repeat_options: null, max_awards: 1 };
 
 export function ChallengeEditor() {
   const { code } = useOrg();
@@ -87,9 +87,10 @@ export function ChallengeEditor() {
               <div className="mt-1 flex flex-wrap gap-1.5 text-xs">
                 <Pill tone="brand">{c.points} pts</Pill>
                 {c.lat != null ? <Pill><MapPin className="size-3" /> {c.radius_m} m</Pill> : <Pill>anywhere</Pill>}
+                {c.repeat_label ? <Pill><Repeat2 className="size-3" /> ×{c.max_awards} · {c.repeat_label}</Pill> : null}
               </div>
             </div>
-            <Button variant="ghost" className="px-2" onClick={() => setEditing({ id: c.id, input: { title: c.title, description: c.description, points: c.points, lat: c.lat, lng: c.lng, radius_m: c.radius_m ?? 100 } })}><Pencil className="size-4" /></Button>
+            <Button variant="ghost" className="px-2" onClick={() => setEditing({ id: c.id, input: { title: c.title, description: c.description, points: c.points, lat: c.lat, lng: c.lng, radius_m: c.radius_m ?? 100, repeat_label: c.repeat_label, repeat_options: c.repeat_options, max_awards: c.max_awards } })}><Pencil className="size-4" /></Button>
             <Button variant="ghost" className="px-2 text-danger" onClick={() => archive(c)}><Trash2 className="size-4" /></Button>
           </Card>
         ))}
@@ -101,6 +102,7 @@ export function ChallengeEditor() {
 function ChallengeForm({ initial, isNew, others, onSave, onCancel }: { initial: ChallengeInput; isNew: boolean; others: Challenge[]; onSave: (input: ChallengeInput) => Promise<void>; onCancel: () => void }) {
   const [input, setInput] = useState<ChallengeInput>(initial);
   const [located, setLocated] = useState(initial.lat != null);
+  const [repeats, setRepeats] = useState(Boolean(initial.repeat_label));
   const [busy, setBusy] = useState(false);
   const [locating, setLocating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -152,6 +154,40 @@ function ChallengeForm({ initial, isNew, others, onSave, onCancel }: { initial: 
       <Field label="Points">
         <Input type="number" min={1} max={10000} value={input.points} onChange={(e) => set({ points: Number(e.target.value) })} required />
       </Field>
+      <Toggle
+        checked={repeats}
+        onChange={(on) => {
+          setRepeats(on);
+          if (!on) set({ repeat_label: null, repeat_options: null, max_awards: 1 });
+          else set({ repeat_label: input.repeat_label || "Which one?", max_awards: Math.max(2, input.max_awards) });
+        }}
+        label="Can be done more than once"
+        hint={repeats ? "Counts once per distinct answer, up to the cap." : "Counts once, however many proofs arrive."}
+      />
+      {repeats ? (
+        <div className="space-y-3">
+          <Field label="Counts once per…" hint='The question each proof answers. "Which park?", "Which city?"'>
+            <Input value={input.repeat_label ?? ""} onChange={(e) => set({ repeat_label: e.target.value || null })} maxLength={80} required placeholder="Which park?" />
+          </Field>
+          <Field label="Cap" hint="How many distinct answers can score.">
+            <Input type="number" min={1} max={50} value={input.max_awards} onChange={(e) => set({ max_awards: Number(e.target.value) })} required />
+          </Field>
+          <Field
+            label="Answers"
+            hint="One per line. Leave empty to let players type their own — a fixed list keeps spellings from splitting the board."
+          >
+            <Textarea
+              value={(input.repeat_options ?? []).join("\n")}
+              onChange={(e) => {
+                const options = e.target.value.split("\n").map((o) => o.trim()).filter(Boolean);
+                set({ repeat_options: options.length ? options : null });
+              }}
+              className="min-h-28"
+              placeholder={"SF\nHyderabad\nBerlin"}
+            />
+          </Field>
+        </div>
+      ) : null}
       <Toggle checked={located} onChange={setLocated} label="Tied to a place" hint={located ? "Players see it on the map and can route to it." : "Can be done anywhere."} />
       {located ? (
         <div className="space-y-3">

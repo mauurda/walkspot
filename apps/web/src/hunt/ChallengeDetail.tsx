@@ -4,7 +4,7 @@
  * steps (slot → PUT → file), each reported, because a walk is exactly where
  * an upload stalls and "Uploading…" for a minute needs to say which part.
  */
-import { Camera, Images, MapPin, Users } from "lucide-react";
+import { Camera, Images, MapPin, Repeat2, Users } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { api, putFile, type Submission } from "../api";
@@ -12,7 +12,7 @@ import { formatAgo, formatDistance, formatPoints } from "../format";
 import { locate } from "../geo";
 import { prepare } from "../image";
 import { Map } from "../map";
-import { Button, Card, Field, Heading, Media, Notice, Pill, Screen, Spinner, Textarea, cx, messageOf } from "../ui";
+import { Button, Card, Field, Heading, Input, Media, Notice, Pill, Screen, Spinner, Textarea, cx, messageOf } from "../ui";
 import { useAsync } from "../ui/useAsync";
 import { useHunt } from "./context";
 import { StatusPill } from "./status";
@@ -34,6 +34,7 @@ export function ChallengeDetail({ id }: { id: string }) {
   const [preview, setPreview] = useState<string | null>(null);
   const [tagged, setTagged] = useState<Set<string>>(new Set());
   const [caption, setCaption] = useState("");
+  const [repeatKey, setRepeatKey] = useState("");
   const [step, setStep] = useState<Step>("idle");
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState<Submission | null>(null);
@@ -73,10 +74,12 @@ export function ChallengeDetail({ id }: { id: string }) {
         member_ids: [...tagged],
         lat: fix?.lat ?? null,
         lng: fix?.lng ?? null,
+        repeat_key: repeatKey.trim() || null,
       });
       setSent(submission);
       onFile(null);
       setCaption("");
+      setRepeatKey("");
       setTagged(new Set());
       void mine.reload();
       void all.reload();
@@ -98,6 +101,17 @@ export function ChallengeDetail({ id }: { id: string }) {
   }
 
   const located = challenge.lat != null && challenge.lng != null;
+  const repeatable = Boolean(challenge.repeat_label);
+  // Answers already banked here, so nobody walks to a park they've done. Safe
+  // to compare exactly: the API snaps an option-list answer to the declared
+  // spelling before filing it.
+  const banked = new Set(
+    (mine.data?.submissions ?? [])
+      .filter((s) => s.status === "approved" && s.repeat_key)
+      .map((s) => s.repeat_key!),
+  );
+  const full = repeatable && (challenge.mine?.awards ?? 0) >= challenge.max_awards;
+  const answered = !repeatable || repeatKey.trim().length > 0;
 
   return (
     <Screen>
@@ -112,6 +126,7 @@ export function ChallengeDetail({ id }: { id: string }) {
       <div className="mt-2 flex flex-wrap gap-1.5">
         {located ? <Pill tone="brand"><MapPin className="size-3" /> at a place</Pill> : <Pill>anywhere</Pill>}
         {challenge.mine ? <StatusPill status={challenge.mine.status} /> : null}
+        {repeatable ? <Pill tone="brand"><Repeat2 className="size-3" /> {challenge.mine?.awards ?? 0} of {challenge.max_awards}</Pill> : null}
       </div>
       {challenge.description ? <p className="mt-3 whitespace-pre-line">{challenge.description}</p> : null}
       {located ? (
@@ -162,11 +177,43 @@ export function ChallengeDetail({ id }: { id: string }) {
                 <p className="mt-2 text-sm text-muted">Worth <span className="font-semibold text-ink">{formatPoints(worth)}</span> to each of the {tagged.size + 1} of you.</p>
               </div>
             ) : null}
+            {repeatable ? (
+              <Field
+                label={challenge.repeat_label!}
+                hint={`Counts once per answer, up to ${challenge.max_awards}. You have ${challenge.mine?.awards ?? 0}.`}
+              >
+                {challenge.repeat_options?.length ? (
+                  <div className="flex flex-wrap gap-2">
+                    {challenge.repeat_options.map((option) => {
+                      const done = banked.has(option);
+                      const on = repeatKey === option;
+                      return (
+                        <button
+                          key={option}
+                          type="button"
+                          disabled={done}
+                          onClick={() => setRepeatKey(on ? "" : option)}
+                          className={cx(
+                            "min-h-10 rounded-full border px-3.5 text-sm font-semibold transition",
+                            done ? "border-hairline bg-paper-soft text-muted line-through" : on ? "border-brand bg-brand text-white" : "border-hairline bg-paper-soft",
+                          )}
+                        >
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <Input value={repeatKey} onChange={(e) => setRepeatKey(e.target.value)} maxLength={80} placeholder="Alamo Square" />
+                )}
+              </Field>
+            ) : null}
+            {full ? <Notice>You've already banked all {challenge.max_awards}. Another proof still shows in the feed, it just won't add points.</Notice> : null}
             <Field label="Caption" hint="Optional.">
               <Textarea value={caption} onChange={(e) => setCaption(e.target.value)} maxLength={500} className="min-h-16" />
             </Field>
             {error ? <Notice tone="danger">{error}</Notice> : null}
-            <Button className="w-full" busy={step !== "idle"} onClick={send}>{STEP_LABEL[step]}</Button>
+            <Button className="w-full" busy={step !== "idle"} disabled={!answered} onClick={send}>{STEP_LABEL[step]}</Button>
           </div>
         )}
       </section>
@@ -181,6 +228,7 @@ export function ChallengeDetail({ id }: { id: string }) {
                 <div className="flex flex-wrap items-center gap-1.5">
                   <StatusPill status={s.status} />
                   {s.status === "approved" ? <Pill tone="brand">{formatPoints(s.points)}</Pill> : null}
+                  {s.repeat_key ? <Pill tone="brand">{s.repeat_key}</Pill> : null}
                   {s.distance_m != null ? <Pill>{formatDistance(s.distance_m)} from the spot</Pill> : null}
                 </div>
                 <div className="text-muted">{s.members.map((m) => m.name).join(", ")} · {formatAgo(s.created_at)}</div>

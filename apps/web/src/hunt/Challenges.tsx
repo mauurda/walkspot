@@ -1,5 +1,5 @@
 "use client";
-import { LocateFixed, MapPin } from "lucide-react";
+import { LocateFixed, MapPin, Repeat2 } from "lucide-react";
 import Link from "next/link";
 import { api } from "../api";
 import { formatDistance, formatPoints } from "../format";
@@ -11,12 +11,15 @@ import { StatusPill } from "./status";
 
 export function Challenges() {
   const { code, event } = useHunt();
-  const { data, error, loading } = useAsync(() => api.challenges(code, "participant"), [code]);
+  const { data, error, loading } = useAsync(() => api.challenges(code, "participant"), [code], { refreshMs: 30_000 });
   const loc = useLocation();
 
   const challenges = data?.challenges ?? [];
   const earned = challenges.reduce((s, c) => s + (c.mine?.points ?? 0), 0);
-  const done = challenges.filter((c) => c.mine?.status === "approved").length;
+  // A repeatable challenge is only done when every award is banked.
+  const done = challenges.filter((c) =>
+    c.repeat_label ? (c.mine?.awards ?? 0) >= c.max_awards : c.mine?.status === "approved",
+  ).length;
 
   return (
     <Screen>
@@ -55,6 +58,9 @@ export function Challenges() {
                     <Pill>anywhere</Pill>
                   )}
                   {c.mine ? <StatusPill status={c.mine.status} /> : null}
+                  {c.repeat_label ? (
+                    <Pill tone="brand"><Repeat2 className="size-3" /> {c.mine?.awards ?? 0} of {c.max_awards}</Pill>
+                  ) : null}
                 </div>
               </div>
               <div className="shrink-0 text-right">
@@ -65,7 +71,7 @@ export function Challenges() {
           </Link>
         ))}
       </div>
-      <p className="mt-6 text-center text-xs text-muted">{formatPoints(challenges.reduce((s, c) => s + c.points, 0))} on the table, before group bonuses.</p>
+      <p className="mt-6 text-center text-xs text-muted">{formatPoints(challenges.reduce((s, c) => s + c.points * (c.repeat_label ? c.max_awards : 1), 0))} on the table, before group bonuses.</p>
     </Screen>
   );
 }

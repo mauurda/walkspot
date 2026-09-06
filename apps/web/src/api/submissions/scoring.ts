@@ -13,6 +13,7 @@
  * same challenge, only their best one counts.
  */
 import type { Challenge, Event, Submission, SubmissionStatus } from "../supabase";
+import { normalizeRepeatKey } from "../challenges/repeat";
 
 export type Bonus = Pick<Event, "group_bonus_pct" | "group_bonus_cap">;
 
@@ -42,20 +43,37 @@ export type Progress = {
   /** approved beats pending beats rejected beats todo. */
   status: "todo" | SubmissionStatus;
   points: number;
+  /** How many distinct answers actually scored — 0 or 1 unless repeatable. */
+  awards: number;
   submission_ids: string[];
 };
+
 
 const RANK: Record<Progress["status"], number> = { todo: 0, rejected: 1, pending: 2, approved: 3 };
 
 export function progressFor(data: ScoringData, participantId: string, challengeId: string): Progress {
-  const out: Progress = { status: "todo", points: 0, submission_ids: [] };
+  const out: Progress = { status: "todo", points: 0, awards: 0, submission_ids: [] };
+  const challenge = data.challenges.get(challengeId);
+  const repeatable = Boolean(challenge?.repeat_label);
+  // Best scoring proof per distinct answer. A plain challenge has one bucket,
+  // so summing its top 1 is the `Math.max` this used to be.
+  const best = new Map<string, number>();
+
   for (const s of data.submissions) {
     if (s.challenge_id !== challengeId) continue;
     if (!data.members.get(s.id)?.includes(participantId)) continue;
     out.submission_ids.push(s.id);
     if (RANK[s.status] > RANK[out.status]) out.status = s.status;
-    out.points = Math.max(out.points, submissionPoints(data, s));
+    const points = submissionPoints(data, s);
+    if (points <= 0) continue; // pending, rejected, or on an archived challenge
+    const key = repeatable ? normalizeRepeatKey(s.repeat_key) : "";
+    best.set(key, Math.max(best.get(key) ?? 0, points));
   }
+
+  const cap = repeatable ? Math.max(1, challenge!.max_awards) : 1;
+  const counted = [...best.values()].sort((a, b) => b - a).slice(0, cap);
+  out.awards = counted.length;
+  out.points = counted.reduce((sum, p) => sum + p, 0);
   return out;
 }
 

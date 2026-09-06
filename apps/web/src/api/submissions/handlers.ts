@@ -14,6 +14,7 @@ import { distanceM } from "../geo";
 import { listChallenges } from "../challenges/handlers";
 import { listRoster } from "../participants/roster";
 import { describeMedia, mediaTypeOfPath, proofPrefix } from "./media";
+import { resolveRepeatKey } from "../challenges/repeat";
 import { submissionPoints } from "./scoring";
 import { loadScoring } from "./load";
 
@@ -56,6 +57,18 @@ export const createSubmission = eventRoute("participant", async ({ event, partic
 
   const caption = typeof body.caption === "string" ? body.caption.trim().slice(0, CAPTION_MAX) || null : null;
 
+  // On a repeatable challenge the proof must say which one it is for.
+  const repeat = resolveRepeatKey(challenge, body.repeat_key);
+  if (!repeat.ok) {
+    throw new AppError(
+      repeat.reason === "required"
+        ? `${challenge.repeat_label} — answer that before sending this proof`
+        : "That isn't one of the options for this challenge",
+      400,
+      "REPEAT_KEY_INVALID",
+    );
+  }
+
   const roster = await listRoster(event.id);
   const rosterIds = new Set(roster.map((p) => p.id));
   const tagged = Array.isArray(body.member_ids) ? body.member_ids : [];
@@ -85,6 +98,7 @@ export const createSubmission = eventRoute("participant", async ({ event, partic
       lat,
       lng,
       distance_m,
+      repeat_key: repeat.key,
       status: event.auto_approve ? "approved" : "pending",
     })
     .select("*")

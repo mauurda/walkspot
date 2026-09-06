@@ -10,6 +10,9 @@ test("create: title + points required, location optional and paired", () => {
     lat: null,
     lng: null,
     radius_m: null,
+    repeat_label: null,
+    repeat_options: null,
+    max_awards: 1,
   });
   assert.deepEqual(validateChallenge({ title: "x", points: 10, lat: 19.43, lng: -99.13 }), {
     title: "x",
@@ -18,6 +21,9 @@ test("create: title + points required, location optional and paired", () => {
     lat: 19.43,
     lng: -99.13,
     radius_m: 100,
+    repeat_label: null,
+    repeat_options: null,
+    max_awards: 1,
   });
   assert.equal(validateChallenge({ title: "x", points: 10, lat: 19.43 }), null);
   assert.equal(validateChallenge({ title: "x", points: 0 }), null);
@@ -31,4 +37,49 @@ test("patch: clearing the location clears the radius; bad radius rejected", () =
   assert.equal(validateChallengePatch({ lat: 1, lng: 2, radius_m: 5 }), null);
   assert.equal(validateChallengePatch({ lat: 91, lng: 0 }), null);
   assert.deepEqual(validateChallengePatch({ description: "" }), { description: null });
+});
+
+// ── repeatable challenges ───────────────────────────────────────────────────
+
+test("create: a repeatable challenge takes a label, options and a cap", () => {
+  assert.deepEqual(
+    validateChallenge({
+      title: "Rotation city food",
+      points: 20,
+      repeat_label: " Which city? ",
+      repeat_options: ["SF", " Hyderabad ", "Berlin"],
+      max_awards: 6,
+    }),
+    {
+      title: "Rotation city food",
+      description: null,
+      points: 20,
+      lat: null,
+      lng: null,
+      radius_m: null,
+      repeat_label: "Which city?",
+      repeat_options: ["SF", "Hyderabad", "Berlin"],
+      max_awards: 6,
+    },
+  );
+});
+
+test("repeat: no label means it counts once, whatever the cap says", () => {
+  const c = validateChallenge({ title: "x", points: 10 });
+  assert.equal(c?.repeat_label, null);
+  assert.equal(c?.repeat_options, null);
+  assert.equal(c?.max_awards, 1);
+});
+
+test("repeat: blank options are dropped and an empty list means free text", () => {
+  assert.deepEqual(validateChallengePatch({ repeat_options: ["Dolores", "  ", ""] }), { repeat_options: ["Dolores"] });
+  assert.deepEqual(validateChallengePatch({ repeat_options: [] }), { repeat_options: null });
+  assert.deepEqual(validateChallengePatch({ repeat_label: "   " }), { repeat_label: null });
+});
+
+test("repeat: a cap must be a whole number of at least one", () => {
+  assert.equal(validateChallengePatch({ max_awards: 0 }), null);
+  assert.equal(validateChallengePatch({ max_awards: 2.5 }), null);
+  assert.equal(validateChallengePatch({ max_awards: 999 }), null);
+  assert.deepEqual(validateChallengePatch({ max_awards: 10 }), { max_awards: 10 });
 });

@@ -108,7 +108,7 @@ export type RosterEntry = {
   claim: { id: string; device_label: string | null; created_at: string; last_seen_at: string } | null;
 };
 
-export type Progress = { status: "todo" | "pending" | "approved" | "rejected"; points: number; submission_ids: string[] };
+export type Progress = { status: "todo" | "pending" | "approved" | "rejected"; points: number; awards: number; submission_ids: string[] };
 
 export type Challenge = {
   id: string;
@@ -119,6 +119,11 @@ export type Challenge = {
   lng: number | null;
   radius_m: number | null;
   position: number;
+  /** Set = repeatable, and the question each proof answers ("Which park?"). */
+  repeat_label: string | null;
+  /** Set = the only answers allowed. Null = free text. */
+  repeat_options: string[] | null;
+  max_awards: number;
   mine?: Progress;
 };
 
@@ -129,6 +134,9 @@ export type ChallengeInput = {
   lat: number | null;
   lng: number | null;
   radius_m: number | null;
+  repeat_label: string | null;
+  repeat_options: string[] | null;
+  max_awards: number;
 };
 
 export type Person = { id: string; name: string };
@@ -143,6 +151,7 @@ export type Submission = {
   lat: number | null;
   lng: number | null;
   distance_m: number | null;
+  repeat_key: string | null;
   status: "pending" | "approved" | "rejected";
   review_note: string | null;
   created_at: string;
@@ -194,7 +203,7 @@ export const api = {
   people: (code: string) => as<{ participants: Spot[] }>(code, "participant", "/participants"),
   uploadUrl: (code: string, body: { challenge_id: string; content_type: string; size: number }) =>
     as<{ url: string; path: string; media_type: "image" | "video" }>(code, "participant", "/submissions/upload-url", json(body)),
-  submit: (code: string, body: { challenge_id: string; path: string; caption: string | null; member_ids: string[]; lat: number | null; lng: number | null }) =>
+  submit: (code: string, body: { challenge_id: string; path: string; caption: string | null; member_ids: string[]; lat: number | null; lng: number | null; repeat_key?: string | null }) =>
     as<{ submission: Submission }>(code, "participant", "/submissions", json(body)),
 
   // Organizer

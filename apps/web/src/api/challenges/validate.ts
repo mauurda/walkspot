@@ -11,6 +11,10 @@ export const POINTS_MAX = 10000;
 export const RADIUS_DEFAULT = 100;
 export const RADIUS_MIN = 10;
 export const RADIUS_MAX = 5000;
+export const REPEAT_LABEL_MAX = 80;
+export const REPEAT_OPTION_MAX = 80;
+export const REPEAT_OPTIONS_MAX = 30;
+export const MAX_AWARDS_MAX = 50;
 
 export type ChallengeInput = {
   title: string;
@@ -19,6 +23,9 @@ export type ChallengeInput = {
   lat: number | null;
   lng: number | null;
   radius_m: number | null;
+  repeat_label: string | null;
+  repeat_options: string[] | null;
+  max_awards: number;
 };
 
 function isFinite(v: unknown): v is number {
@@ -46,6 +53,32 @@ export function validateChallengePatch(body: unknown): Partial<ChallengeInput> |
   if ("points" in b) {
     if (!Number.isInteger(b.points) || (b.points as number) < 1 || (b.points as number) > POINTS_MAX) return null;
     out.points = b.points as number;
+  }
+  if ("repeat_label" in b) {
+    if (b.repeat_label != null && typeof b.repeat_label !== "string") return null;
+    const label = typeof b.repeat_label === "string" ? b.repeat_label.trim() : "";
+    if (label.length > REPEAT_LABEL_MAX) return null;
+    out.repeat_label = label || null;
+  }
+  if ("repeat_options" in b) {
+    if (b.repeat_options == null) out.repeat_options = null;
+    else {
+      if (!Array.isArray(b.repeat_options)) return null;
+      if (b.repeat_options.length > REPEAT_OPTIONS_MAX) return null;
+      const options: string[] = [];
+      for (const raw of b.repeat_options) {
+        if (typeof raw !== "string") return null;
+        const option = raw.trim();
+        if (!option) continue; // a blank row in the editor is not an option
+        if (option.length > REPEAT_OPTION_MAX) return null;
+        options.push(option);
+      }
+      out.repeat_options = options.length ? options : null;
+    }
+  }
+  if ("max_awards" in b) {
+    if (!Number.isInteger(b.max_awards) || (b.max_awards as number) < 1 || (b.max_awards as number) > MAX_AWARDS_MAX) return null;
+    out.max_awards = b.max_awards as number;
   }
   if ("lat" in b || "lng" in b || "radius_m" in b) {
     const located = b.lat != null || b.lng != null;
@@ -79,5 +112,8 @@ export function validateChallenge(body: unknown): ChallengeInput | null {
     lat: patch.lat ?? null,
     lng: patch.lng ?? null,
     radius_m: patch.lat != null ? (patch.radius_m ?? RADIUS_DEFAULT) : null,
+    repeat_label: patch.repeat_label ?? null,
+    repeat_options: patch.repeat_label ? (patch.repeat_options ?? null) : null,
+    max_awards: patch.repeat_label ? (patch.max_awards ?? 1) : 1,
   };
 }

@@ -83,6 +83,13 @@ export type Challenge = {
   lng: number | null;
   radius_m: number | null;
   position: number;
+  /** Non-null makes the challenge repeatable, and is the question the player
+   *  answers ("Which park?"). Null: it counts once, full stop. */
+  repeat_label: string | null;
+  /** When set, the only answers allowed — a picker instead of a text box. */
+  repeat_options: string[] | null;
+  /** How many distinct answers may score. Only read when repeat_label is set. */
+  max_awards: number;
   created_at: string;
   archived_at: string | null;
 };
@@ -101,6 +108,8 @@ export type Submission = {
   lat: number | null;
   lng: number | null;
   distance_m: number | null;
+  /** Which one this proof is for ("Dolores Park"). Null on a plain challenge. */
+  repeat_key: string | null;
   status: SubmissionStatus;
   reviewed_at: string | null;
   reviewed_by: string | null;
