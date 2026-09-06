@@ -4,7 +4,7 @@
  * claim → validate it once against /me (a released spot clears itself
  * there), then tabs around the page.
  */
-import { Camera, ListChecks, Map as MapIcon, Trophy } from "lucide-react";
+import { Camera, ListChecks, Map as MapIcon, Trophy, UserRound } from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
 import { api, type Event } from "../api";
 import { Join } from "../join/Join";
@@ -18,6 +18,7 @@ const TABS = [
   { to: "map", label: "Map", icon: MapIcon },
   { to: "feed", label: "Feed", icon: Camera },
   { to: "board", label: "Board", icon: Trophy },
+  { to: "me", label: "You", icon: UserRound },
 ];
 
 export function HuntLayout({ code, children }: { code: string; children: ReactNode }) {

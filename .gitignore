@@ -5,3 +5,6 @@ dist/
 .env.local
 .DS_Store
 .vercel
+
+# Supabase CLI scratch
+supabase/.temp/
