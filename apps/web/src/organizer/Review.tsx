@@ -17,7 +17,7 @@ const FILTERS = ["pending", "approved", "rejected", "all"] as const;
 export function Review() {
   const { code, event } = useOrg();
   const [filter, setFilter] = useState<(typeof FILTERS)[number]>(event.auto_approve ? "all" : "pending");
-  const { data, error, loading, setData } = useAsync(() => api.feed(code, "organizer", filter === "all" ? {} : { status: filter }), [code, filter]);
+  const { data, error, loading, setData } = useAsync(() => api.feed(code, "organizer", filter === "all" ? {} : { status: filter }), [code, filter], { refreshMs: 20_000 });
   const challenges = useAsync(() => api.challenges(code, "organizer"), [code]);
   const [actionError, setActionError] = useState<string | null>(null);
   const radiusOf = new globalThis.Map(challenges.data?.challenges.map((c) => [c.id, c.radius_m]) ?? []);

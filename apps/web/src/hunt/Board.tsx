@@ -6,7 +6,7 @@ import { Empty, Heading, Notice, Screen, Spinner, cx } from "../ui";
 import { useAsync } from "../ui/useAsync";
 
 export function Board({ code, role }: { code: string; role: Role }) {
-  const { data, error, loading } = useAsync(() => api.board(code, role), [code, role]);
+  const { data, error, loading } = useAsync(() => api.board(code, role), [code, role], { refreshMs: 20_000 });
   const meId = useHuntSession(code)?.participant?.id;
 
   return (
