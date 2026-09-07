@@ -9,7 +9,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { api, notifySessionChange, store, type Spot } from "../api";
 import { setParticipant } from "../session";
-import { Button, Notice, Screen, Title, cx, messageOf } from "../ui";
+import { Button, Notice, Screen, Spinner, Title, cx, messageOf } from "../ui";
 import { useAsync } from "../ui/useAsync";
 
 export function Join({ code }: { code: string }) {
@@ -34,7 +34,7 @@ export function Join({ code }: { code: string }) {
     }
   }
 
-  if (loading && !data) return <Screen>Loading…</Screen>;
+  if (loading && !data) return <Screen><Spinner /></Screen>;
   if (error || !data) {
     return (
       <Screen>
@@ -97,7 +97,7 @@ export function Join({ code }: { code: string }) {
                 Not me
               </Button>
               <Button className="flex-1" busy={busy} onClick={() => claim(picked)}>
-                Yes, that's me
+                {busy ? "Claiming your spot…" : "Yes, that's me"}
               </Button>
             </div>
           </div>
