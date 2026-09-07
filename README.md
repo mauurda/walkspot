@@ -60,8 +60,9 @@ testable with `node:test` and reusable by a native client later.
 
 **Points are never stored.** A proof is worth
 `base × (1 + min(cap, pct × (people − 1)) / 100)` to everyone tagged on it;
-per person and challenge only the best approved proof counts; the board is
-derived on every read. Reject a proof, archive a challenge, or change the
+per person and challenge only the best approved proof counts — unless the
+challenge is repeatable, when it counts once per distinct answer up to
+`max_awards` ("which park?", up to ten). The board is derived on every read. Reject a proof, archive a challenge, or change the
 bonus, and the board simply moves. → `apps/web/src/api/submissions/README.md`
 
 **Media never touches the API.** The client asks for a signed upload slot,
@@ -84,7 +85,7 @@ the credential lives in the phone.
 | `/` | anyone | enter a code, or create a hunt; hunts this device is on |
 | `/new` | anyone | name, passphrase, scoring rule → becomes its organizer |
 | `/e/:code` | new phone | pick your name (irreversible, and it says so) |
-| `/e/:code` … `/c/:id` `/map` `/feed` `/board` | player | challenges + score, proof form with tagging, map + route plan, everyone's proofs, leaderboard |
+| `/e/:code` … `/c/:id` `/map` `/feed` `/board` `/me` | player | challenges + score, proof form with tagging, map + route plan, everyone's proofs, leaderboard, and your own page — every proof you are credited on, tagged or not |
 | `/o/:code` | organizer | passphrase sign-in, then People (add · release · remove), Challenges (map picker, radius, order), Review (approve/reject with the GPS distance), Feed, Board, Setup (share links, scoring) |
 
 ## Setup
