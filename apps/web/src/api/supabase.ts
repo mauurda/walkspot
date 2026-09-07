@@ -79,6 +79,8 @@ export type Challenge = {
   title: string;
   description: string | null;
   points: number;
+  /** Where it happens, in words — shown on the card beside the distance. */
+  place: string | null;
   lat: number | null;
   lng: number | null;
   radius_m: number | null;

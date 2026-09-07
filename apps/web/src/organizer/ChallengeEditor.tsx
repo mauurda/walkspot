@@ -13,7 +13,7 @@ import { Button, Card, Empty, Field, Heading, Input, Notice, Pill, Screen, Spinn
 import { useAsync } from "../ui/useAsync";
 import { useOrg } from "./context";
 
-const BLANK: ChallengeInput = { title: "", description: null, points: 10, lat: null, lng: null, radius_m: 100, repeat_label: null, repeat_options: null, max_awards: 1 };
+const BLANK: ChallengeInput = { title: "", description: null, points: 10, place: null, lat: null, lng: null, radius_m: 100, repeat_label: null, repeat_options: null, max_awards: 1 };
 
 export function ChallengeEditor() {
   const { code } = useOrg();
@@ -86,11 +86,12 @@ export function ChallengeEditor() {
               <div className="truncate font-semibold">{c.title}</div>
               <div className="mt-1 flex flex-wrap gap-1.5 text-xs">
                 <Pill tone="brand">{c.points} pts</Pill>
-                {c.lat != null ? <Pill><MapPin className="size-3" /> {c.radius_m} m</Pill> : <Pill>anywhere</Pill>}
+                {c.place ? <Pill tone="brand"><MapPin className="size-3" /> {c.place}</Pill> : null}
+                {c.lat != null ? <Pill>{c.radius_m} m</Pill> : c.place ? null : <Pill>anywhere</Pill>}
                 {c.repeat_label ? <Pill><Repeat2 className="size-3" /> ×{c.max_awards} · {c.repeat_label}</Pill> : null}
               </div>
             </div>
-            <Button variant="ghost" className="px-2" onClick={() => setEditing({ id: c.id, input: { title: c.title, description: c.description, points: c.points, lat: c.lat, lng: c.lng, radius_m: c.radius_m ?? 100, repeat_label: c.repeat_label, repeat_options: c.repeat_options, max_awards: c.max_awards } })}><Pencil className="size-4" /></Button>
+            <Button variant="ghost" className="px-2" onClick={() => setEditing({ id: c.id, input: { title: c.title, description: c.description, points: c.points, place: c.place, lat: c.lat, lng: c.lng, radius_m: c.radius_m ?? 100, repeat_label: c.repeat_label, repeat_options: c.repeat_options, max_awards: c.max_awards } })}><Pencil className="size-4" /></Button>
             <Button variant="ghost" className="px-2 text-danger" onClick={() => archive(c)}><Trash2 className="size-4" /></Button>
           </Card>
         ))}
@@ -150,6 +151,9 @@ function ChallengeForm({ initial, isNew, others, onSave, onCancel }: { initial: 
       </Field>
       <Field label="Description" hint="What counts, what doesn't.">
         <Textarea value={input.description ?? ""} onChange={(e) => set({ description: e.target.value || null })} maxLength={2000} />
+      </Field>
+      <Field label="Place" hint={`Where it happens, in words — "Bob's Donuts". Shown on the card. Optional, and separate from the map pin.`}>
+        <Input value={input.place ?? ""} onChange={(e) => set({ place: e.target.value || null })} maxLength={120} placeholder="Palace of Fine Arts" />
       </Field>
       <Field label="Points">
         <Input type="number" min={1} max={10000} value={input.points} onChange={(e) => set({ points: Number(e.target.value) })} required />

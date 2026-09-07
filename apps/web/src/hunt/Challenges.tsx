@@ -49,12 +49,10 @@ export function Challenges() {
               <div className="min-w-0">
                 <div className="font-semibold">{c.title}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+                  {c.place ? <Pill tone="brand"><MapPin className="size-3" /> {c.place}</Pill> : null}
                   {c.lat != null && c.lng != null ? (
-                    <Pill tone="brand">
-                      <MapPin className="size-3" />
-                      {loc.fix ? formatDistance(distanceM(loc.fix, { lat: c.lat, lng: c.lng })) : "on the map"}
-                    </Pill>
-                  ) : (
+                    <Pill>{loc.fix ? formatDistance(distanceM(loc.fix, { lat: c.lat, lng: c.lng })) : "on the map"}</Pill>
+                  ) : c.place ? null : (
                     <Pill>anywhere</Pill>
                   )}
                   {c.mine ? <StatusPill status={c.mine.status} /> : null}

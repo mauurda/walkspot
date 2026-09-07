@@ -117,14 +117,21 @@ export function ChallengeDetail({ id }: { id: string }) {
     <Screen>
       <Link href={`/e/${code}`} className="text-sm text-muted">← All challenges</Link>
       <div className="mt-3 flex items-start justify-between gap-3">
-        <Heading className="text-2xl">{challenge.title}</Heading>
+        <div className="min-w-0">
+          <Heading className="text-2xl">{challenge.title}</Heading>
+          {challenge.place ? (
+            <div className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-brand-deep">
+              <MapPin className="size-4 shrink-0" /> {challenge.place}
+            </div>
+          ) : null}
+        </div>
         <div className="shrink-0 text-right">
           <div className="font-display text-2xl font-semibold text-brand-deep">{challenge.points}</div>
           <div className="text-xs text-muted">pts</div>
         </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
-        {located ? <Pill tone="brand"><MapPin className="size-3" /> at a place</Pill> : <Pill>anywhere</Pill>}
+        {located ? <Pill tone="brand"><MapPin className="size-3" /> on the map</Pill> : challenge.place ? null : <Pill>anywhere</Pill>}
         {challenge.mine ? <StatusPill status={challenge.mine.status} /> : null}
         {repeatable ? <Pill tone="brand"><Repeat2 className="size-3" /> {challenge.mine?.awards ?? 0} of {challenge.max_awards}</Pill> : null}
       </div>

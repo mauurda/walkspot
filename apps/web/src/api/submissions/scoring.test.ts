@@ -6,7 +6,7 @@ import { leaderboard, pointsFor, progressFor, submissionPoints, type ScoringData
 const bonus = { group_bonus_pct: 25, group_bonus_cap: 100 };
 
 function challenge(id: string, points: number): Challenge {
-  return { id, event_id: "e", title: id, description: null, points, lat: null, lng: null, radius_m: null, position: 0, repeat_label: null, repeat_options: null, max_awards: 1, created_at: "", archived_at: null };
+  return { id, event_id: "e", title: id, description: null, points, place: null, lat: null, lng: null, radius_m: null, position: 0, repeat_label: null, repeat_options: null, max_awards: 1, created_at: "", archived_at: null };
 }
 
 function submission(id: string, challenge_id: string, status: Submission["status"]): Submission {

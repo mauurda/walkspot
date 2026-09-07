@@ -115,6 +115,7 @@ export type Challenge = {
   title: string;
   description: string | null;
   points: number;
+  place: string | null;
   lat: number | null;
   lng: number | null;
   radius_m: number | null;
@@ -131,6 +132,7 @@ export type ChallengeInput = {
   title: string;
   description: string | null;
   points: number;
+  place: string | null;
   lat: number | null;
   lng: number | null;
   radius_m: number | null;

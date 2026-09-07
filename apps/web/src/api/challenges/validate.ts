@@ -11,6 +11,7 @@ export const POINTS_MAX = 10000;
 export const RADIUS_DEFAULT = 100;
 export const RADIUS_MIN = 10;
 export const RADIUS_MAX = 5000;
+export const PLACE_MAX = 120;
 export const REPEAT_LABEL_MAX = 80;
 export const REPEAT_OPTION_MAX = 80;
 export const REPEAT_OPTIONS_MAX = 30;
@@ -20,6 +21,9 @@ export type ChallengeInput = {
   title: string;
   description: string | null;
   points: number;
+  /** Where it happens, in words. Independent of the pin: a place can be named
+   *  without coordinates, and a pin means nothing to a player without one. */
+  place: string | null;
   lat: number | null;
   lng: number | null;
   radius_m: number | null;
@@ -53,6 +57,12 @@ export function validateChallengePatch(body: unknown): Partial<ChallengeInput> |
   if ("points" in b) {
     if (!Number.isInteger(b.points) || (b.points as number) < 1 || (b.points as number) > POINTS_MAX) return null;
     out.points = b.points as number;
+  }
+  if ("place" in b) {
+    if (b.place != null && typeof b.place !== "string") return null;
+    const place = typeof b.place === "string" ? b.place.trim() : "";
+    if (place.length > PLACE_MAX) return null;
+    out.place = place || null;
   }
   if ("repeat_label" in b) {
     if (b.repeat_label != null && typeof b.repeat_label !== "string") return null;
@@ -109,6 +119,7 @@ export function validateChallenge(body: unknown): ChallengeInput | null {
     title: patch.title,
     description: patch.description ?? null,
     points: patch.points,
+    place: patch.place ?? null,
     lat: patch.lat ?? null,
     lng: patch.lng ?? null,
     radius_m: patch.lat != null ? (patch.radius_m ?? RADIUS_DEFAULT) : null,

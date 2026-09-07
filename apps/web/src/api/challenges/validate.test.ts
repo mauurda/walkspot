@@ -7,6 +7,7 @@ test("create: title + points required, location optional and paired", () => {
     title: "Find the fountain",
     description: null,
     points: 50,
+    place: null,
     lat: null,
     lng: null,
     radius_m: null,
@@ -18,6 +19,7 @@ test("create: title + points required, location optional and paired", () => {
     title: "x",
     description: null,
     points: 10,
+    place: null,
     lat: 19.43,
     lng: -99.13,
     radius_m: 100,
@@ -54,6 +56,7 @@ test("create: a repeatable challenge takes a label, options and a cap", () => {
       title: "Rotation city food",
       description: null,
       points: 20,
+      place: null,
       lat: null,
       lng: null,
       radius_m: null,
@@ -83,3 +86,23 @@ test("repeat: a cap must be a whole number of at least one", () => {
   assert.equal(validateChallengePatch({ max_awards: 999 }), null);
   assert.deepEqual(validateChallengePatch({ max_awards: 10 }), { max_awards: 10 });
 });
+
+// ── place ───────────────────────────────────────────────────────────────────
+
+test("place: a challenge can name where it happens, with or without a pin", () => {
+  const c = validateChallenge({ title: "Shout in a circle", points: 20, place: "  Palace of Fine Arts " });
+  assert.equal(c?.place, "Palace of Fine Arts");
+  // A place needs no coordinates — "Old Minerva HQ" is a place we can name
+  // and could not pin.
+  assert.equal(c?.lat, null);
+});
+
+test("place: blank clears it, and it defaults to null", () => {
+  assert.deepEqual(validateChallengePatch({ place: "   " }), { place: null });
+  assert.deepEqual(validateChallengePatch({ place: null }), { place: null });
+  assert.equal(validateChallenge({ title: "x", points: 10 })?.place, null);
+});
+
+test("place: too long is rejected", () => {
+  assert.equal(validateChallengePatch({ place: "x".repeat(121) }), null);
+})

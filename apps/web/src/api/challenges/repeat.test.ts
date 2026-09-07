@@ -6,7 +6,7 @@ import { normalizeRepeatKey, resolveRepeatKey } from "./repeat";
 function challenge(over: Partial<Challenge> = {}): Challenge {
   return {
     id: "c", event_id: "e", title: "t", description: null, points: 10,
-    lat: null, lng: null, radius_m: null, position: 0,
+    place: null, lat: null, lng: null, radius_m: null, position: 0,
     repeat_label: null, repeat_options: null, max_awards: 1,
     created_at: "", archived_at: null, ...over,
   };
