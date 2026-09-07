@@ -110,12 +110,32 @@ npm run dev   # http://localhost:3000 — pages and /api together
 
 ## Deploy
 
-One Vercel project, root directory `apps/web`, framework Next.js, Node 22.
-Set the same three variables from `.env.example` in the project's
-environment. Migrations apply on merge to `main` through the Supabase
-integration — don't `db push` by hand, and keep them additive so code and
-schema land in either order. There is no OTA or native build here: a merge
-to `main` is a deploy.
+One Vercel project, framework Next.js, Node 22. Set the same three variables
+from `.env.example` in the project's environment. There is no OTA or native
+build here: a merge to `main` is a deploy.
+
+Two project settings decide whether that sentence is true, and both fail
+quietly when wrong:
+
+- **Root Directory must be `apps/web`.** The repo root holds only the
+  workspace wrapper, whose `package.json` has no `next` in it, so a build
+  at the root dies with *"No Next.js version detected"* — a message that
+  reads like a dependency problem and is actually a path problem. No CLI
+  command sets this; it is *Settings → Build & Deployment → Root Directory*.
+  A `vercel deploy` run from inside `apps/web` sidesteps it, because the
+  uploaded directory is the root — which is why a CLI deploy can succeed
+  while every git deploy fails.
+- **Production Branch must be `main`.** Otherwise pushes to `main` land as
+  *preview* and production quietly keeps tracking whatever branch the
+  project was imported from. It lives under *Settings → Environments →
+  Production → Branch Tracking* — not under Settings → Git, where it used
+  to be.
+
+Migrations should apply on merge through Supabase's GitHub integration —
+connect the repo under *Integrations → GitHub*. Until that is connected,
+`supabase db push` is the only way to apply one, which is how the schema
+was first bootstrapped. Keep migrations additive either way, so code and
+schema can land in either order.
 
 ## Verify
 
